@@ -10,14 +10,6 @@ if(!isset($_GET["wine_name"]))
    header("Location: http://yallara.cs.rmit.edu.au/~e02439/wda/a1_B/search_page.php");
 
 
-//Try to connect to the database
-
-$dbconn = db_connect();  //A function that connects to the winestore database
-if(!$dbconn){
-    db_showerror("Database Handler is NULL");
-    die();
-}
-
 
 //Extract and clean the 'GET' values
 
@@ -32,10 +24,11 @@ $min_ordered = db_clean($_GET["min_ordered"]);
 $cost_min = db_clean($_GET["cost_min"]);
 $cost_max = db_clean($_GET["cost_max"]);
 
+
+
+
 $error_array = array();
 $test = false;
-
-
 
 //Test for errors
 
@@ -128,16 +121,19 @@ if(!count($error_array)){
 }
 
 
+//Try to connect to the database
+
+$db= db_connect();
+
+
 
 //Now use the query
 
 $table_data = NULL;
 
 if($query){
-    $num_rows = db_get_array($query, $dbconn, $table_data);
-    if($num_rows == -1 || ($num_rows>0 && !$table_data))
-        array_push($error_array, "Could not execute search");
-    elseif($num_rows == 0)
+    $table_data = db_get_array($query, $db);
+    if(count($table_data) == 0)
         array_push($error_array, "Your search produced no results");
 }
 

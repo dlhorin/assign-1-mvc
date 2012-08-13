@@ -1,49 +1,22 @@
 <?php
-/**
- * Define the DB connection details separately so that 
- * they are not publicly available in github. 
- *
- */
-
-/**
- * Hostname and port mysql is running on (can't use localhost)
- */
-define('DB_HOST',   'yallara.cs.rmit.edu.au:58621');
-/**
- * Name of database to connect to
- */
-define('DB_NAME',   'winestore');
-/**
- * Username to connect with
- */
-define('DB_USER',   'winestore');
-
-/**
- * Password to connect with
- */
-define('DB_PW',     'winepass');
-
-/**
- * Print mysql errors in a user-friendly manner
- */
-function showerror(){
-   die("Error ". mysql_errno() . " : " . mysql_error());
-}
 
 /**
  * Connect to mysql and select the winestore database
  */
-function db_connect(){
-   if(!($dbconn = @mysql_connect(DB_HOST, DB_USER, DB_PW))){
-      showerror();
-   }
- 
-   if(!(@mysql_select_db(DB_NAME, $dbconn))){
-      showerror();
-   }
 
-   return $dbconn;
+function db_connect(){
+    try{
+        $db = new PDO(
+            "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
+            DB_USER,
+            DB_PW
+        );
+    } catch(PDOException $e){
+        die($e->getMessage());
+    }
+    return $db;
 }
+
 
 function db_showerror($message = NULL){
    if( ($errno = mysql_errno()) )
@@ -61,24 +34,17 @@ function db_geterror($message = NULL){
    return NULL;
 }
 
-function db_get_array($query, $dbconn, &$data){
-    $data = NULL;
-    if( !($result = mysql_query($query, $dbconn)) )
-        return -1;
-
-    $num_rows = mysql_num_rows($result);
-    if($num_rows == -1)
-        return 0;
-
-    $data = array();
-    for($i = 0; $i<$num_rows; $i++)
-        $data[$i] = mysql_fetch_assoc($result);
-
-
-    return $num_rows;
+function db_clean($string){
+    return (trim($string));
 }
 
-function db_clean($string){
-    return @mysql_real_escape_string(trim($string));
+function db_get_array($query, $db){
+    try{
+        $statement = $db->prepare($query);
+        $statement->execute();
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }catch(PDOException $e){
+            die($e->getMessage());
+    }
 }
 ?>

@@ -2,38 +2,22 @@
 require_once("config.php");
 require_once("templates.php");
 
-try{
-    $dbconn = db_connect();
-} catch(PDOException $e) {
-    die($e->getMessage());
-}
+$db = db_connect();
 
 //Building the data for the 'region' drop-down list
 $query = "select region_name as region, region_id from region order by region";
-$num_regions = @db_get_array($query, $dbconn, $region_data);
-if($num_regions == -1){
-    db_showerror("Cannot populate region list");
-    die();
-}
-
+$region_data = db_get_array($query, $db);
 
 //Building the data for the 'grape_variety' drop-down list
 $query = "select variety, variety_id from grape_variety order by variety";
-$num_vars = @db_get_array($query, $dbconn, $variety_data);
-if($num_vars == -1){
-    db_showerror("Cannot populate region list");
-    die();
-}
+$variety_data= db_get_array($query, $db);
+
 
 //Building the data for the 'years' list
 $query = "select distinct year from wine order by year";
-$num_years = @db_get_array($query, $dbconn, $year_data);
-if($num_years== -1){
-    db_showerror("Cannot populate year list");
-    die();
-}
+$year_data= db_get_array($query, $db);
 
-mysql_close($dbconn);
+$db = NULL;
 
 ?>
 

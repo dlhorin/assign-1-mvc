@@ -10,7 +10,7 @@ define("USERDIR", "/home/staff/e02439/");
 /**
  * Hostname mysql is running on (can't use localhost)
  */
-define('DB_HOST',   'yallara.cs.rmit.edu.au:');
+define('DB_HOST',   'yallara.cs.rmit.edu.au');
 /**
  * Port that mysql is running on
  */
@@ -29,10 +29,3 @@ define('DB_USER',   'winestore');
  */
 define('DB_PW',     'winepass');
 
-function db_connect(){
-    $db = new PDO(
-        "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME,
-        DB_USER,
-        DB_PW
-    );
-}
