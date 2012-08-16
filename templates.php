@@ -1,6 +1,5 @@
 <?php
 require_once("config.php");
-require_once("db.php");
 
 function generate_table($table_data, $name){
     if(!isset($table_data) || !$table_data || !count($table_data))

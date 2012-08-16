@@ -15,12 +15,9 @@ $variety_data = $search->get_grape_varieties();
 //Building the data for the 'years' list
 $year_data = $search->get_years();
 
-$search = NULL;
 
 include('header.php');
 include('search_panel.php');
 include('footer.php');
 
 ?>
-
-

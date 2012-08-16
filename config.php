@@ -28,4 +28,4 @@ define('DB_USER',   'winestore');
  * Password to connect with
  */
 define('DB_PW',     'winepass');
-
+?>

@@ -10,7 +10,6 @@ if(!isset($_GET["wine_name"]))
    header("Location: http://yallara.cs.rmit.edu.au/~e02439/wda/a1_B/search_page.php");
 
 
-
 //Extract and clean the 'GET' values
 
 $wine_name = db_clean($_GET["wine_name"]);

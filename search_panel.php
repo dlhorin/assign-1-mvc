@@ -62,4 +62,4 @@ generate_dropdown($year_data, "year", "year", "year_max");
 </tr>
 </table>
 
-<input type="submit" value="Submit"/>
+<input type="submit" value="Submit" name="submit_search"/>
