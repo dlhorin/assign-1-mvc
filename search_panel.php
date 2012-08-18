@@ -14,7 +14,7 @@
 <td>Select region:</td>
 <td>
 <?php
-generate_dropdown($region_data, "region", "region_id", "region")
+generate_dropdown($region_data, "region", "region_id", "region_id")
 ?>
 </td>
 </tr>
@@ -23,7 +23,7 @@ generate_dropdown($region_data, "region", "region_id", "region")
 <td>Select grape variety:</td>
 <td>
 <?php
-generate_dropdown($variety_data, "variety", "variety_id", "grape_variety");
+generate_dropdown($variety_data, "variety", "variety_id", "variety_id");
 ?>
 </td>
 </tr>
