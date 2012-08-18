@@ -181,11 +181,10 @@ class Answer extends A1{
             echo "Null Form";
 
         $this->errors = NULL;
-        echo "<br/>\n";
         foreach($this->to_validate as $data){
            if($this->validateKey($data['key'], $data['code']) === false){
                 if($data['msg'] !== NULL){
-                    $this->errors[$data['key']] = $data['msg'];
+                    $this->errors[] = $data['msg'];
                 }
             }
 
@@ -198,7 +197,7 @@ class Answer extends A1{
 
         if($this->form['cost_min'] !==false && $this->form['cost_max'] !== false
                                         && $this->form['cost_min'] > $this->form['cost_max']){
-            $this->errors['compare_costs'] = 'Minimum cost must be less than maximum cost';
+            $this->errors[] = 'Minimum cost must be less than maximum cost';
         }
              
         if($this->errors)

@@ -1,7 +1,7 @@
 <?php
 require_once('config.php');
-require_once('templates.php');
 require_once('class.a1.php');
+require_once('SmartyConfig.php');
 
 $search = new Search();
 
@@ -15,9 +15,11 @@ $variety_data = $search->get_grape_varieties();
 //Building the data for the 'years' list
 $year_data = $search->get_years();
 
+$smarty->assign('regions', $region_data);
+$smarty->assign('varieties', $variety_data);
+$smarty->assign('years', $year_data);
 
-include('header.php');
-include('search_panel.php');
-include('footer.php');
+$smarty->display('search.tpl');
+
 
 ?>

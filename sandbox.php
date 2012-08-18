@@ -1,27 +1,26 @@
 <?php
 require_once('config.php');
-require_once('db.php');
+require_once('templates.php');
+require_once('class.a1.php');
+require_once('SmartyConfig.php');
 
-$db = db_connect();
+$search = new Search();
 
-if(!$db)
-    db_showerror();
+//Building the data for the 'region' drop-down list
+$region_data = $search->get_regions();
 
-//$query = 'select wine_name as \'Wine\', year as Year, winery_name as \'Winery\', region_name as \'Region\', on_hand, cost as Price, sum(qty) as num_ordered, sum(price) as Revenue from wine, winery, region, wine_variety, grape_variety, inventory, items where wine.winery_id=winery.winery_id and winery.region_id=region.region_id and wine.wine_id=wine_variety.wine_id and wine_variety.variety_id=grape_variety.variety_id and wine.wine_id=items.wine_id and inventory.wine_id=wine.wine_id ';
+//Building the data for the 'grape_variety' drop-down list
+$variety_data = $search->get_grape_varieties();
 
-   $query = "select wine_name as 'Wine', year as Year, winery_name as 'Winery', region_name as 'Region', on_hand, cost as Price, sum(qty) as num_ordered, sum(price) as Revenue from wine, winery, region, wine_variety, grape_variety, inventory, items where wine.winery_id=winery.winery_id and winery.region_id=region.region_id and wine.wine_id=wine_variety.wine_id and wine_variety.variety_id=grape_variety.variety_id and wine.wine_id=items.wine_id and inventory.wine_id=wine.wine_id";
-$query = $query . ' GROUP BY wine.wine_id';
-$query = $query . ' ORDER BY wine.wine_name';
 
-echo $query;
+//Building the data for the 'years' list
+$year_data = $search->get_years();
 
-$stmt = $db->prepare($query);
-$stmt->execute();
-$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-foreach($result as $row){
-    foreach($row as $key => $val){
-        echo $key.' => '.$val."<br/>\n";
-    }
-}
+$smarty->assign('regions', $region_data);
+$smarty->assign('varieties', $variety_data);
+$smarty->assign('years', $year_data);
+
+$smarty->display('search.tpl');
+
 
 ?>

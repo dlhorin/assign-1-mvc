@@ -1,12 +1,12 @@
 <?php
 require_once("config.php");
-require_once("db.php");
 require_once("templates.php");
-require_once("useful_functions.php");
 require_once('class.a1.php');
+require_once('SmartyConfig.php');
 
 $answer = new Answer();
-$error_array = NULL;
+$form_errors = NULL;
+$server_error = false;
 $table_data = NULL;
 
 try{
@@ -15,44 +15,22 @@ try{
    header("Location: http://yallara.cs.rmit.edu.au/~e02439/wda/a1_B/search_page.php");
 }
 
-if($answer->isValidForm())
-    $table_data = $answer->runSearch();
-
-$error_array = $answer->getErrors();
-
-?>
-
-<html>
-<head><title>WDA Assignment 1, Part B</title></head>
-
-<body>
-
-<h1>WDA Assignmen1 1, Part B</h1>
-<h3>Daisy Horin 5 August, 2012</h3>
-<br />
-
-
-<?php
-
-if($error_array && count($error_array)){
-    foreach($error_array as $key=>$error)
-        echo $error."<br/>\n";
+try{
+    if($answer->isValidForm())
+        $table_data = $answer->runSearch();
+}catch(Exception $e){
+    $server_error = true;
 }
 
-else{
-?>
-    <h4>Your Search Results</h4>
-<?php
-    generate_table($table_data, "results");
-}
-?>
+$form_errors = $answer->getErrors();
 
-<form action="search_page.php" method="get">
-<input type="submit" value="Back to Search Page"/>
-</form>
+$smarty->assign('server_error', $server_error);
+$smarty->assign('form_errors', $form_errors);
+$smarty->assign('table_data', $table_data);
 
-</body>
-</html>
+$smarty->display('answer.tpl');
+
+?>
 
 
 
