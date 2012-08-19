@@ -4,6 +4,7 @@ require_once('class.a1.php');
 require_once('SmartyConfig.php');
 
 $search = new Search();
+$smarty = new A1Smarty();
 
 //Building the data for the 'region' drop-down list
 $region_data = $search->get_regions();

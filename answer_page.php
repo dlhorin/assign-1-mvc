@@ -1,9 +1,9 @@
 <?php
 require_once("config.php");
-require_once("templates.php");
 require_once('class.a1.php');
 require_once('SmartyConfig.php');
 
+$smarty = new A1Smarty();
 $answer = new Answer();
 $form_errors = NULL;
 $server_error = false;
