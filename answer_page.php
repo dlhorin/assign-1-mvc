@@ -1,6 +1,7 @@
 <?php
 require_once("config.php");
-require_once('class.a1.php');
+require_once('models/Answer.class.php');
+require_once('models/Wine.class.php');
 require_once('SmartyConfig.php');
 
 $smarty = new A1Smarty();
@@ -28,9 +29,5 @@ $smarty->assign('server_error', $server_error);
 $smarty->assign('form_errors', $form_errors);
 $smarty->assign('table_data', $table_data);
 
-$smarty->display('answer.tpl');
-
+$smarty->display('views/answer.tpl');
 ?>
-
-
-

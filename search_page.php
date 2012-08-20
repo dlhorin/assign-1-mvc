@@ -1,6 +1,6 @@
 <?php
 require_once('config.php');
-require_once('class.a1.php');
+require_once('models/Search.class.php');
 require_once('SmartyConfig.php');
 
 $search = new Search();
@@ -21,6 +21,4 @@ $smarty->assign('varieties', $variety_data);
 $smarty->assign('years', $year_data);
 
 $smarty->display('search.tpl');
-
-
 ?>
