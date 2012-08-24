@@ -3,123 +3,134 @@ require_once(PROJECT_ROOT . 'db.ini');
 require_once('BaseClass.class.php');
 require_once('Wine.class.php');
 
+class FormException extends Exception{
+    function __construct(){
+        parent::__construct();
+    }
+}
+
 class Answer extends BaseClass{
     const SUBMIT_KEY = 'submit_search';
-    const STR = 1;
-    const IS_INT_ = 2;
-    const IS_NUM = 4;
-    const IS_POS = 8;
-    const NOT_EMPTY = 16;
-
     private $form = NULL;
     private $errors = NULL;
-
-    private $code_int = 1;
-
-    private $to_validate = NULL;
-
-    private $query = NULL;    
+    private $has_errors = true;
+    private $query = NULL;
     
     
     function __construct(){
         parent::__construct();
+    }
 
-        $this->to_validate = array(
-            array('key' => 'wine_name', 'code'=>NULL, 'msg'=>NULL),
-            array('key'=>'winery_name', 'code'=>NULL, 'msg'=>NULL),
-            array('key'=>'region_id', 'code'=>self::IS_INT_ | self::IS_POS, 'msg'=>'Region ID must be a positive whole number'),
-            array('key'=>'variety_id', 'code'=>self::IS_INT_ | self::IS_POS, 'msg'=>'Variety ID must be a positive whole number'),
-            array('key'=>'year_min', 'code'=>self::IS_INT_ | self::IS_POS, 'msg'=>'Minumum Year must a be positive whole number'),
-            array('key'=>'year_max', 'code'=>self::IS_INT_ | self::IS_POS, 'msg'=>'Maximum Year must be a positive whole number'),
-            array('key'=>'min_on_hand', 'code'=>self::IS_INT_ | self::IS_POS, 'msg'=>'Minumum Amount Stocked must be a positive whole number'),
-            array('key'=>'min_ordered', 'code'=>self::IS_INT_ | self::IS_POS, 'msg'=>'Minimum Amount Ordered must be a positive whole number'),
-            array('key'=>'cost_min', 'code'=>self::IS_NUM | self::IS_POS, 'msg'=>'Minimum price must be a positive number'),
-            array('key'=>'cost_max', 'code'=>self::IS_NUM | self::IS_POS, 'msg'=>'Maximum price must be a positive number'),
-        );
-
+    private function _int_or_blank($str){
+        return preg_match('/^[0-9]*$/', $str);
+    }
+    private function _num_or_blank($str){
+        if($str === '')
+            return true;
+        return is_numeric($str);
     }
 
     function passForm($form){        
         if(!array_key_exists(self::SUBMIT_KEY, $form))
-      throw new Exception();
+            throw new FormException();
+
+        $req_keys = array('wine_name', 'winery_name', 'region_id', 'variety_id',
+                     'year_min', 'year_max', 'min_on_hand', 'min_ordered', 
+                     'cost_min', 'cost_max');
+
+        //Check that each form element exists.
+        //Sanitise all input for security
+        foreach($req_keys as $key){
+            if(!array_key_exists($key, $form))
+                throw new FormException();
+            $form[$key] = trim(filter_var($form[$key], FILTER_SANITIZE_STRING));
+        }
+        $this->has_errors = true;
+
         $this->form = $form;
     }
 
-    function validateKey($key, $code, $msg=NULL){
-        if(!array_key_exists($key, $this->form)){
-            throw new Exception();
-        }
 
-        $val = $this->form[$key];
-
-        if($val === ''){
-            if($code & self::NOT_EMPTY){
-                $this->form[$key] = false;
-                return false;
-            }
-            return '';
-        }
-
-        if($code & self::IS_INT_){
-            $val = filter_var($val, FILTER_SANITIZE_NUMBER_INT);
-            $val = filter_var($val, FILTER_VALIDATE_INT);
-        }
-        elseif($code & self::IS_NUM){
-            $val = filter_var($val, FILTER_SANITIZE_NUMBER_FLOAT);
-            $val = filter_var($val, FILTER_VALIDATE_FLOAT);
-        }
-        else{
-            $val = filter_var($val);
-        }
-
-        if($code & self::IS_POS){
-            if($val < 0)
-                $val = false;
-        }
-
-        $this->form[$key] = $val;
-        return $val;
-            
-    }
-
-
-
-    function isValidForm(){
+    /*
+     * Sanitizes and validates the form
+     * Returns true if the form is valid, or false if not
+     */
+    function validateForm(){
+        //Don't try to validate if form hasn't been passed in
         if($this->form === NULL)
-            echo "Null Form";
+            return;
 
-        $this->errors = NULL;
-        foreach($this->to_validate as $data){
-           if($this->validateKey($data['key'], $data['code']) === false){
-                if($data['msg'] !== NULL){
-                    $this->errors[$data['key']] = $data['msg'];
-                }
-            }
+        $this->has_errors = false;
 
+        //Validate the minimum amount in stock
+        $val = $this->form['min_on_hand'];
+        $this->errors['min_on_hand'] = '';
+        if(!$this->_int_or_blank($val)){
+            $this->errors['min_on_hand'] = 'Must be a whole number';
+            $this->has_errors = true;
+        }
+        else if($val < 0){
+            $this->errors['min_on_hand'] = 'Must be positive';
+            $this->has_errors = true;
         }
 
-        if($this->form['year_min'] !==false && $this->form['year_max']!==false 
-                                    && $this->form['year_min'] > $this->form['year_max']){
-            $this->errors['compare_years'] = 'Minimum year must be less than Maximum year';
+        //Validate the minimum amount ordered
+        $val = $this->form['min_ordered'];
+            $this->errors['min_ordered'] = '';
+        if(!$this->_int_or_blank($val)){
+            $this->errors['min_ordered'] = 'Must be a whole number';
+            $this->has_errors = true;
+        }
+        else if($val < 0){
+            $this->errors['min_ordered'] = 'Must be positive';
+            $this->has_errors = true;
         }
 
-        if($this->form['cost_min'] !==false && $this->form['cost_max'] !== false
-                                        && $this->form['cost_min'] > $this->form['cost_max']){
-            $this->errors['compare_costs'] = 'Minimum cost must be less than maximum cost';
+
+        //Check that year_min < year_max
+            $this->errors['compare_years'] = '';
+        if($this->form['year_min'] > $this->form['year_max']){
+            $this->errors['compare_years'] = 'Minimum year must be less than maximum';
+            $this->has_errors = true;
         }
-             
-        if($this->errors)
-            return false;
-        return true;
+
+        //Validate the minimum & maximum costs
+        $val1 = $this->form['cost_min'];
+        $val2 = $this->form['cost_max'];
+            $this->errors['cost'] = '';
+            $this->errors['compare_costs'] = '';
+        if(!$this->_num_or_blank($val1) || !$this->_num_or_blank($val2)){
+            $this->errors['cost'] = 'Must be numbers';
+            $this->has_errors = true;
+        }
+        else if($val1 < 0 || $val2 < 0){
+            $this->errors['cost'] = 'Must be positive';
+            $this->has_errors = true;
+        }
+        else if($val1 != '' && $val2 != '' && $val1 > $val2){
+            $this->errors['compare_costs'] = 'Minimum price must be less than maximum';
+            $this->has_errors = true;
+        }
+
+        return $this->has_errors;
     }
 
 
+    /*
+     * Returns the form errors, or NULL if no errors
+     * Always returns NULL if called
+     * before validateForm - must be used after that function
+     */
     function getErrors(){
+        if(!$this->has_errors)
+            return NULL;
         return $this->errors;
     }
 
 
     function runSearch(){
+        if($this->has_errors)
+            return NULL;
 
         $wine_query = <<<_END
         SELECT
@@ -154,8 +165,8 @@ class Answer extends BaseClass{
             AND ("" = :year_min OR wine.year>=:year_min)
             AND ("" = :year_max OR wine.year<=:year_max)
             AND ("" = :min_on_hand OR on_hand>=:min_on_hand)
-            AND ("" = :cost_min OR Price>=:cost_min)
-            AND ("" = :cost_max OR Price<=:cost_max)
+            AND ("" = :cost_min OR Cost>=:cost_min)
+            AND ("" = :cost_max OR Cost<=:cost_max)
 
             GROUP BY wine.wine_id
 
@@ -175,38 +186,33 @@ _END;
 
 
         $wine_results = NULL;
-        try{
-            $wine_stmt = $this->db->prepare($wine_query);
-            $variety_stmt = $this->db->prepare($variety_query);
+        $wine_stmt = $this->db->prepare($wine_query);
+        $variety_stmt = $this->db->prepare($variety_query);
 
-            $wine_stmt->bindValue(':wine_name', '%'.$this->form['wine_name'].'%');
-            $wine_stmt->bindValue(':winery_name', '%'.$this->form['winery_name'].'%');
-            $wine_stmt->bindValue(':region_id', $this->form['region_id']);
-            $wine_stmt->bindValue(':variety_id', $this->form['variety_id']);
-            $wine_stmt->bindValue(':year_min', $this->form['year_min']);
-            $wine_stmt->bindValue(':year_max', $this->form['year_max']);
-            $wine_stmt->bindValue(':min_on_hand', $this->form['min_on_hand']);
-            $wine_stmt->bindValue(':cost_min', $this->form['cost_min']);
-            $wine_stmt->bindValue(':cost_max', $this->form['cost_max']);
-            $wine_stmt->bindValue(':min_ordered', $this->form['min_ordered']);
+        $wine_stmt->bindValue(':wine_name', '%'.$this->form['wine_name'].'%');
+        $wine_stmt->bindValue(':winery_name', '%'.$this->form['winery_name'].'%');
+        $wine_stmt->bindValue(':region_id', $this->form['region_id']);
+        $wine_stmt->bindValue(':variety_id', $this->form['variety_id']);
+        $wine_stmt->bindValue(':year_min', $this->form['year_min']);
+        $wine_stmt->bindValue(':year_max', $this->form['year_max']);
+        $wine_stmt->bindValue(':min_on_hand', $this->form['min_on_hand']);
+        $wine_stmt->bindValue(':cost_min', $this->form['cost_min']);
+        $wine_stmt->bindValue(':cost_max', $this->form['cost_max']);
+        $wine_stmt->bindValue(':min_ordered', $this->form['min_ordered']);
 
-            $wine_stmt->execute();
-            $wine_stmt->setFetchMode(PDO::FETCH_CLASS, 'Wine');
-            
-            $i = 0;
-            while($temp = $wine_stmt->fetch(PDO::FETCH_CLASS)){
-                $wine_results[$i] = $temp;
-                $variety_stmt->bindValue(':wine_id', $wine_results[$i]->wine_id);
-                $variety_stmt->execute();
-                $variety_result = $variety_stmt->fetch(PDO::FETCH_ASSOC);
-                $wine_results[$i]->grape_varieties = $variety_result['varieties'];
-                $i++;
-            }
-            
+        $wine_stmt->execute();
+        $wine_stmt->setFetchMode(PDO::FETCH_CLASS, 'Wine');
+        
+        $i = 0;
+        while($temp = $wine_stmt->fetch(PDO::FETCH_CLASS)){
+            $wine_results[$i] = $temp;
+            $variety_stmt->bindValue(':wine_id', $wine_results[$i]->wine_id);
+            $variety_stmt->execute();
+            $variety_result = $variety_stmt->fetch(PDO::FETCH_ASSOC);
+            $wine_results[$i]->grape_varieties = $variety_result['varieties'];
+            $i++;
         }
-        catch(PDOException $e){
-            throw new Exception('Server Error');
-        }
+
         return $wine_results;
     }
 

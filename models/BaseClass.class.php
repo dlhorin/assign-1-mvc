@@ -5,18 +5,13 @@ abstract class BaseClass{
     protected $db = NULL;
 
     function __construct(){
-        try {
-            $this->db = new PDO(
-                'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';
-                dbname=' . DB_NAME,
-                DB_USER,
-                DB_PW
-            );
-
+        $this->db = new PDO(
+            'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';
+            dbname=' . DB_NAME,
+            DB_USER,
+            DB_PW
+        );
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch(PDOException $e) {
-            die($e->getMessage());
-        }
     }
 
     function execute($query){

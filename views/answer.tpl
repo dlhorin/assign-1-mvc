@@ -8,22 +8,12 @@
     Please try again later, or if the problem persists, contact the webmaster
     on webmaster [[at]] mywinesearch.org
 
-{elseif $form_errors}
-
-Your search could not be processed<br/>
-Please fix and search again<br/>
-<ul>
-    {foreach from=$form_errors item=error}
-        <li>{$error}</li>
-    {/foreach}
-</ul>
-
-{elseif !count($table_data)}
+{elseif !isset($table_data) || !$table_data || !count($table_data)}
 Your search did not match any of our wines.
 
 {else}
 
-<table border='1'>
+<table id="answer_table">
 
     <tr>
         <th>Wine</th><th>Year</th><th>Grape Varieties</th><th>Winery</th>
@@ -49,7 +39,7 @@ Your search did not match any of our wines.
 
 
 <form action="search_page.php" method="get">
-<input type="submit" value="Back to Search Page"/>
+<input type="submit" value="Back to Search Page" class="submit"/>
 </form>
 
 
