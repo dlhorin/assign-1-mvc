@@ -14,7 +14,7 @@ $table_data = NULL;
 
 try{
     $answer = new Answer();
-    $answer->passForm($_GET);    
+    $answer->passForm($_GET);
     $answer->validateForm();
     if($form_errors = $answer->getErrors()){
         $_SESSION['errors'] = $form_errors;
@@ -28,6 +28,13 @@ catch(FormException $e){
 }
 catch(PDOException $e){
     $server_error = true;
+}
+
+if(!$server_error && $table_data && isset($_SESSION['is_tracking'])){
+    if(isset($_SESSION['wines']))
+        $_SESSION['wines'] = array_merge($_SESSION['wines'], $table_data);
+    else
+        $_SESSION['wines'] = $table_data;
 }
 
 

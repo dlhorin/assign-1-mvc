@@ -35,7 +35,7 @@ class Answer extends BaseClass{
             throw new FormException();
 
         $req_keys = array('wine_name', 'winery_name', 'region_id', 'variety_id',
-                     'year_min', 'year_max', 'min_on_hand', 'min_ordered', 
+                     'year_min', 'year_max', 'min_on_hand', 'min_ordered',
                      'cost_min', 'cost_max');
 
         //Check that each form element exists.

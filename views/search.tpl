@@ -1,5 +1,6 @@
 {include file='header.tpl'}
 
+{include file='track_plugin.tpl'}
 
 <form action="answer_page.php" method="get">
 

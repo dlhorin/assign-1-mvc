@@ -1,19 +1,9 @@
 {include file='header.tpl'}
 
-{include file='track_plugin.tpl'}
-
 <p>
 
-{if $server_error}
-    Well, this is embarrassing<br/>
-    We seem to be experiencing a problem processing your query<br/>
-    Please try again later, or if the problem persists, contact the webmaster
-    on webmaster [[at]] mywinesearch.org
-
-{elseif !isset($table_data) || !$table_data || !count($table_data)}
-Your search did not match any of our wines.
-
-{else}
+{if isset($table_data)}
+Here are all the wines you have viewed so far
 
 <table id="answer_table">
 
@@ -35,14 +25,13 @@ Your search did not match any of our wines.
 
 </table>
 
+{else}
+You have not viewed any wines so far
+
 {/if}
 
 </p>
 
-
-<form action="search_page.php" method="get">
-<input type="submit" value="Back to Search Page" class="submit"/>
-</form>
 
 
 {include file='footer.tpl'}
