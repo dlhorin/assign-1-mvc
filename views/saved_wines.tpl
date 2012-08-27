@@ -1,10 +1,10 @@
 {include file='header.tpl'}
 
 <p>
-
 {if isset($table_data)}
-Here are all the wines you have viewed so far
-
+Here are all the wines you have viewed so far<br/>
+<a href='{$tweeturl}'>Tweet this list</a>
+{if $just_tweeted}Thank-You for Tweeting{/if}    
 <table id="answer_table">
 
     <tr>
